@@ -1,51 +1,89 @@
 import './sass/main.scss';
-import './js/fetchCountries.js';
+import API from './js/fetchCountries.js';
+import getRefs from './js/get-refs';
 
-import { alert, defaultModules } from '../node_modules/@pnotify/core/dist/PNotify.js';
-import * as PNotifyMobile from '../node_modules/@pnotify/mobile/dist/PNotifyMobile.js';
- 
-  defaultModules.set(PNotifyMobile, {});
- 
-  alert({
-    text: 'Notice me, senpai!'
-  });
-
+import { PNotifyAlert, PNotifyError } from './js/pnotify.js';
 import debounce from 'lodash.debounce';
 
-debounce(test, 2000)
-function test () {
-  console.log('object')
+
+const refs = getRefs();
+
+refs.input.addEventListener('input', debounce(onSearch, 500));
+
+function onSearch(e) {
+  e.preventDefault();
+  const searchQuery = e.target.value;
+  if (searchQuery.length > 0) {
+    clearSearch();
+    clearList();
+
+    API.fetchCountries(searchQuery).then(data => {      
+      
+      if (data.length > 10) {
+        PNotifyAlert();
+      }
+      
+      else if (data.length >= 2) {
+        data.forEach(country => {
+          refs.list.insertAdjacentHTML('beforeend', `<li>${country.name}</li>`)
+        });
+        
+        refs.list.addEventListener('click', el => {
+          
+          const country = data.find(country => {
+            return country.name === el.target.textContent
+          })
+          // clearSearch();
+          clearList();
+          createCountryCard(country);
+        })
+      }
+
+      else if (data.length === 1) {
+        renderCountriesList(data);
+      }
+      else PNotifyError();
+
+    })
+      .catch(() => { console.log("Houston! We have a problem!");});
+  }
 }
 
 
-const refs = {
-  form: document.querySelector('#form'),
-  input: document.querySelector('#search'),
-  container: document.querySelector('.container')
+function createCountryCard(country) {
+    const article = `<div class="country">
+              <div class="country__name">
+                  <h1 class="country__name"> ${country.name}</h1>
+              </div>
+                  <div class="country__content">
+                      <p class="country__descr">
+                          <span class="descr">Capital:</span> ${country.capital}</p>
+                      <p class="country__descr">
+                          <span class="descr">Population:</span> ${country.population}</p>
+                      <div class="lang-list">
+                          <p class="country__descr">
+                              <span class="descr">Languages:</span> ${languagesList(country.languages)}</p>
+                      </div>
+                  </div>
+              <div class="country__flag">
+                  <img src="${country.flag}" alt="${country.name}" width="200">
+              </div>
+          </div>
+        `
+  refs.container.insertAdjacentHTML('beforeend', article)
 }
 
-// function fetchCountries(searchQuery) {
-//   return fetch(`https://restcountries.eu/rest/v2/name/${name}`)
-//     .then(response => response.json())
-  
-//     .catch(error => console.log(error))
-// }
+const languagesList = (ar) => ar.map(lang => " " + lang.name);
 
-fetch('https://restcountries.eu/rest/v2/all').then(response => {
-  return response.json();
-}).then(country => {
-  console.log(country);
-})
-  .catch(error => {
-    console.log(error);
-  });
 
-  
-const onSearch = (ev) => {
-  ev.preventDefault();
-  const value = refs.input.value
-
-  console.log(value);
+function renderCountriesList(arr) {
+  arr.forEach(el => createCountryCard(el));
 }
 
-refs.form.addEventListener('submit', onSearch);
+function clearList() {
+  refs.container.innerHTML = '';
+}
+
+function clearSearch() {
+  refs.list.innerHTML = '';
+}

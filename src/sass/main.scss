@@ -5,3 +5,68 @@
 
 // Стили для файла с примером HTML-фрагмента
 @import './example';
+
+.container {
+  text-align: center;
+}
+
+img {
+  display: grid;
+  max-width: 100%;
+  height: auto;
+  outline: 1px solid black;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 40px;
+}
+
+#form {
+  display: block;
+  text-align: center;
+}
+
+#search {
+  margin-top: 30px;
+  margin-bottom: 50px;
+  text-align: center;
+  padding: 15px;
+  width: 50%;
+  border-radius: 4px;
+  text-transform: uppercase;
+  &:focus {
+    color: cadetblue;
+  }
+}
+
+.countries__list {
+  padding-left: 0;
+}
+
+li {
+  margin-bottom: 10px;
+  font-size: 20px;
+  list-style-type: none;
+
+  &:focus,
+  &:hover {
+    color: blue;
+    cursor: pointer;
+  }
+}
+
+.country__name {
+  margin-top: 40px;
+  text-transform: uppercase;
+}
+
+.descr {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.country__descr,
+.lang-list {
+  font-size: 18px;
+  font-weight: 400;
+  list-style-type: none;
+}
